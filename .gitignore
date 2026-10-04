@@ -49,6 +49,9 @@ SourceArt/**/*.tga
 Binaries/*
 Plugins/**/Binaries/*
 
+# ignore large content files
+Content
+
 # Builds
 Build/*
 
