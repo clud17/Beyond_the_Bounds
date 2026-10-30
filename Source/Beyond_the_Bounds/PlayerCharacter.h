@@ -6,6 +6,8 @@
 #include "GameFramework/Character.h"
 #include "PlayerCharacter.generated.h"
 
+struct FInputActionValue;
+
 UCLASS()
 class BEYOND_THE_BOUNDS_API APlayerCharacter : public ACharacter
 {
@@ -25,5 +27,20 @@ public:
 
 	// Called to bind functionality to input
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
+
+protected:
+	UFUNCTION()
+	void Move(const FInputActionValue& Value);
+	UFUNCTION()
+	void StartJump(const FInputActionValue& Value);
+	UFUNCTION()
+	void StopJump(const FInputActionValue& Value);
+	UFUNCTION()
+	void Look(const FInputActionValue& Value);
+
+
+private:
+	UPROPERTY(EditAnywhere, Category = "Movement")
+	float moveSpeed = 500.0f;
 
 };

@@ -2,6 +2,8 @@
 
 
 #include "PlayerCharacter.h"
+#include "ClientPlayerController.h"
+#include "EnhancedInputComponent.h"
 
 // Sets default values
 APlayerCharacter::APlayerCharacter()
@@ -30,5 +32,74 @@ void APlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCom
 {
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
 
+	if (UEnhancedInputComponent* EnhancedInput = Cast<UEnhancedInputComponent>(PlayerInputComponent))
+	{
+		if (AClientPlayerController* PlayerController = Cast<AClientPlayerController>(GetController())) 
+		{
+			if (PlayerController->MoveAction) 
+			{
+				EnhancedInput->BindAction(PlayerController->MoveAction, ETriggerEvent::Triggered, this, &APlayerCharacter::Move);
+			}
+			if (PlayerController->JumpAction)
+			{
+				EnhancedInput->BindAction(PlayerController->JumpAction, ETriggerEvent::Triggered, this, &APlayerCharacter::StartJump);
+				EnhancedInput->BindAction(PlayerController->JumpAction, ETriggerEvent::Completed, this, &APlayerCharacter::StopJump);
+			}
+			if (PlayerController->LookAction) 
+			{
+				EnhancedInput->BindAction(PlayerController->LookAction, ETriggerEvent::Triggered, this, &APlayerCharacter::Look);
+			}
+		}
+	}
 }
 
+void APlayerCharacter::Move(const FInputActionValue& value)
+{
+	// 컨트롤러가 있어야 방향 계산 가능
+	if (!Controller) return;
+
+	// Value는 Axis2D로 설정된 IA_Move의 입력값을 가져옴
+	const FVector2D MoveInput = value.Get<FVector2D>();
+
+	if (!FMath::IsNearlyZero(MoveInput.X))
+	{
+		// 캐릭터가 바라보는 방향(정면)으로 X축 이동
+		AddMovementInput(GetActorForwardVector(), MoveInput.X * moveSpeed);
+	}
+
+	if (!FMath::IsNearlyZero(MoveInput.Y))
+	{
+		// 캐릭터의 오른쪽 방향으로 Y축 이동
+		AddMovementInput(GetActorRightVector(), MoveInput.Y * moveSpeed);
+	}
+}
+
+void APlayerCharacter::StartJump(const FInputActionValue& value)
+{
+	// Jump 함수는 Character가 기본 제공
+	if (value.Get<bool>())
+	{
+		Jump();
+	}
+}
+
+void APlayerCharacter::StopJump(const FInputActionValue& value)
+{
+	// StopJumping 함수도 Character가 기본 제공
+	if (value.Get<bool>())
+	{
+		StopJumping();
+	}
+}
+
+void APlayerCharacter::Look(const FInputActionValue& value)
+{
+	// 마우스의 X, Y 움직임을 2D 축으로 가져옴
+	FVector2D LookInput = value.Get<FVector2D>();
+
+	// x는 좌우 회전, y는 상하 회전
+	// 좌우 회전
+	AddControllerYawInput(LookInput.X);
+	// 상하 회전
+	AddControllerPitchInput(LookInput.Y);
+}
