@@ -3,6 +3,7 @@
 
 #include "PlayerCharacter.h"
 #include "Net/UnrealNetwork.h"
+#include "HealthComponent.h"
 #include "ClientPlayerController.h"
 #include "EnhancedInputComponent.h"
 
@@ -11,6 +12,9 @@ APlayerCharacter::APlayerCharacter()
 {
  	// Set this character to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
+
+	// health system Component
+	HealthComponent = CreateDefaultSubobject<UHealthComponent>(TEXT("HealthComponent"));
 
 }
 

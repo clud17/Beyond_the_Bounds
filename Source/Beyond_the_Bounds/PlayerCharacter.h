@@ -28,7 +28,10 @@ public:
 	// Called to bind functionality to input
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
+	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
+
 protected:
+	// input binding functions
 	UFUNCTION()
 	void Move(const FInputActionValue& Value);
 	UFUNCTION()
@@ -39,14 +42,17 @@ protected:
 	void Look(const FInputActionValue& Value);
 	UFUNCTION()
 	void Interact(const FInputActionValue& Value);
-
-protected:
+	// Server RPC - interaction functions
 	UFUNCTION(Server, Reliable)
 	void Server_Interact();
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Health")
+	TObjectPtr<class UHealthComponent> HealthComponent;
 
 private:
 	UPROPERTY(EditAnywhere, Category = "Movement")
 	float moveSpeed = 500.0f;
+
 
 public:
 	UPROPERTY(ReplicatedUsing = OnRep_InteractionCount)
@@ -55,5 +61,5 @@ public:
 	UFUNCTION()
 	void OnRep_InteractionCount();
 
-	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
+	
 };
