@@ -2,6 +2,7 @@
 
 
 #include "PlayerCharacter.h"
+#include "Net/UnrealNetwork.h"
 #include "ClientPlayerController.h"
 #include "EnhancedInputComponent.h"
 
@@ -13,11 +14,24 @@ APlayerCharacter::APlayerCharacter()
 
 }
 
+void APlayerCharacter::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
+{
+	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+
+	DOREPLIFETIME(APlayerCharacter, InteractCount);
+}
+
+
 // Called when the game starts or when spawned
 void APlayerCharacter::BeginPlay()
 {
 	Super::BeginPlay();
-	
+	//UE_LOG(LogTemp, Warning, TEXT("GetName: %s"), *GetName());
+	//UE_LOG(LogTemp, Warning, TEXT("IsLocallyControlled: %s"), IsLocallyControlled() ? TEXT("true") : TEXT("false"));
+	//UE_LOG(LogTemp, Warning, TEXT("LocalRole: %s"), *UEnum::GetValueAsString(GetLocalRole()));
+	//UE_LOG(LogTemp, Warning, TEXT("GetOwner: %s"), GetOwner() ? *GetOwner()->GetName() : TEXT("None"));
+	//UE_LOG(LogTemp, Warning, TEXT("GetNetConnection: %s"), GetNetConnection() ? *GetNetConnection()->GetName() : TEXT("None"));
+	//UE_LOG(LogTemp, Warning, TEXT("Authority: %s"), HasAuthority() ? TEXT("true") : TEXT("false"));
 }
 
 // Called every frame
@@ -48,6 +62,10 @@ void APlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCom
 			if (PlayerController->LookAction) 
 			{
 				EnhancedInput->BindAction(PlayerController->LookAction, ETriggerEvent::Triggered, this, &APlayerCharacter::Look);
+			}
+			if (PlayerController->InteractAction)
+			{
+				EnhancedInput->BindAction(PlayerController->InteractAction, ETriggerEvent::Started, this, &APlayerCharacter::Interact);
 			}
 		}
 	}
@@ -102,4 +120,29 @@ void APlayerCharacter::Look(const FInputActionValue& value)
 	AddControllerYawInput(LookInput.X);
 	// 상하 회전
 	AddControllerPitchInput(LookInput.Y);
+}
+
+void APlayerCharacter::Interact(const FInputActionValue& value)
+{
+	// 상호작용 로직 구현
+	if (value.Get<bool>())
+	{
+		Server_Interact();
+	}
+}
+
+void APlayerCharacter::Server_Interact_Implementation()
+{
+	// 서버에서 상호작용 로직 구현
+	if (HasAuthority()) 
+	{
+		//UE_LOG(LogTemp, Warning, TEXT("Server Interact action triggered"));
+		InteractCount++;
+		UE_LOG(LogTemp, Warning, TEXT("Interaction count: %d"), InteractCount);
+	}	
+}
+
+void APlayerCharacter::OnRep_InteractionCount()
+{
+	UE_LOG(LogTemp, Warning, TEXT("OnRep: Interaction count updated: %d"), InteractCount);
 }

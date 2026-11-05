@@ -37,10 +37,23 @@ protected:
 	void StopJump(const FInputActionValue& Value);
 	UFUNCTION()
 	void Look(const FInputActionValue& Value);
+	UFUNCTION()
+	void Interact(const FInputActionValue& Value);
 
+protected:
+	UFUNCTION(Server, Reliable)
+	void Server_Interact();
 
 private:
 	UPROPERTY(EditAnywhere, Category = "Movement")
 	float moveSpeed = 500.0f;
 
+public:
+	UPROPERTY(ReplicatedUsing = OnRep_InteractionCount)
+	int InteractCount = 0;
+
+	UFUNCTION()
+	void OnRep_InteractionCount();
+
+	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 };

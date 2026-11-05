@@ -6,7 +6,8 @@ AClientPlayerController::AClientPlayerController()
 	InputMappingContext(nullptr),
 	MoveAction(nullptr),
 	JumpAction(nullptr),
-	LookAction(nullptr)
+	LookAction(nullptr),
+	InteractAction(nullptr)
 {
 }
 

@@ -23,6 +23,8 @@ public:
 	UInputAction* JumpAction;
 	UPROPERTY(EditAnyWhere, BluePrintReadWrite, Category = "Input");
 	UInputAction* LookAction;
+	UPROPERTY(EditAnyWhere, BluePrintReadWrite, Category = "Input");
+	UInputAction* InteractAction;
 
 protected:
 	virtual void BeginPlay() override;
