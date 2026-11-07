@@ -7,7 +7,8 @@ AClientPlayerController::AClientPlayerController()
 	MoveAction(nullptr),
 	JumpAction(nullptr),
 	LookAction(nullptr),
-	InteractAction(nullptr)
+	InteractAction(nullptr),
+	AttackAction(nullptr)
 {
 }
 

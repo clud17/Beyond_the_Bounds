@@ -5,6 +5,7 @@
 #include "Net/UnrealNetwork.h"
 #include "HealthComponent.h"
 #include "ClientPlayerController.h"
+#include "Kismet/KismetSystemLibrary.h"
 #include "EnhancedInputComponent.h"
 
 // Sets default values
@@ -70,6 +71,10 @@ void APlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCom
 			if (PlayerController->InteractAction)
 			{
 				EnhancedInput->BindAction(PlayerController->InteractAction, ETriggerEvent::Started, this, &APlayerCharacter::Interact);
+			}
+			if (PlayerController->AttackAction)
+			{
+				EnhancedInput->BindAction(PlayerController->AttackAction, ETriggerEvent::Started, this, &APlayerCharacter::Attack);
 			}
 		}
 	}
@@ -138,12 +143,54 @@ void APlayerCharacter::Interact(const FInputActionValue& value)
 void APlayerCharacter::Server_Interact_Implementation()
 {
 	// 서버에서 상호작용 로직 구현
-	if (HasAuthority()) 
+	if (HasAuthority())
 	{
 		//UE_LOG(LogTemp, Warning, TEXT("Server Interact action triggered"));
 		InteractCount++;
 		UE_LOG(LogTemp, Warning, TEXT("Interaction count: %d"), InteractCount);
-	}	
+	}
+}
+
+void APlayerCharacter::Attack(const FInputActionValue& value)
+{
+	// 공격 로직 구현
+	if (value.Get<bool>())
+	{
+		Server_Attack();
+	}
+}
+
+void APlayerCharacter::Server_Attack_Implementation()
+{
+	// 서버에서 공격 로직 구현
+	if (HasAuthority())
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Server Attack action triggered"));
+		// 근접 공격 로직
+		FVector Start = GetActorLocation() + FVector(0.0f, 0.0f, 20.0f);
+		FVector Direction = GetControlRotation().Vector();
+		FVector End = Start + Direction * attackRange;
+		float Radius = 50.0f;
+
+		FCollisionQueryParams QueryParams;
+		FHitResult HitResult;
+
+		bool hit = UKismetSystemLibrary::SphereTraceSingle
+			(
+			this, Start, End, Radius, UEngineTypes::ConvertToTraceType(ECC_Visibility), 
+			false, TArray<AActor*>(), EDrawDebugTrace::ForDuration, HitResult, true,
+			FLinearColor::Red, FLinearColor::Green, 2.0f
+			);
+
+		if (hit) 
+		{
+			UE_LOG(LogTemp, Warning, TEXT("Hit Actor: %s"), *HitResult.GetActor()->GetName());
+		}
+		else 
+		{
+			UE_LOG(LogTemp, Warning, TEXT("No Hit"));
+		}
+	}
 }
 
 void APlayerCharacter::OnRep_InteractionCount()

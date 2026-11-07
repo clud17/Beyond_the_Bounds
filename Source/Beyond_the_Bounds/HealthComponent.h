@@ -31,4 +31,8 @@ public:
 
 	UFUNCTION()
 	void OnRep_CurrentHealth();
+
+	UFUNCTION(BlueprintCallable, Category = "Health")
+	void TakeDamage(float dmg);
+	
 };

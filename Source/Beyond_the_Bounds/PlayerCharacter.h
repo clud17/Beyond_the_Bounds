@@ -42,9 +42,15 @@ protected:
 	void Look(const FInputActionValue& Value);
 	UFUNCTION()
 	void Interact(const FInputActionValue& Value);
+	UFUNCTION()
+	void Attack(const FInputActionValue& Value);
+
 	// Server RPC - interaction functions
 	UFUNCTION(Server, Reliable)
 	void Server_Interact();
+	// Server RPC - attack functions
+	UFUNCTION(Server, Reliable)
+	void Server_Attack();
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Health")
 	TObjectPtr<class UHealthComponent> HealthComponent;
@@ -52,6 +58,9 @@ protected:
 private:
 	UPROPERTY(EditAnywhere, Category = "Movement")
 	float moveSpeed = 500.0f;
+
+	UPROPERTY(EditAnywhere, Category = "Attack")
+	float attackRange = 300.0f;
 
 
 public:
