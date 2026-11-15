@@ -185,6 +185,12 @@ void APlayerCharacter::Server_Attack_Implementation()
 		if (hit) 
 		{
 			UE_LOG(LogTemp, Warning, TEXT("Hit Actor: %s"), *HitResult.GetActor()->GetName());
+			// hit된 Result에서 HealthComponent를 찾아서 TakeDamage 호출
+			UHealthComponent* hits_healComp = HitResult.GetActor()->FindComponentByClass<UHealthComponent>();
+			if (hits_healComp) // HealthComp가 존재하는 것만 받기 위해
+			{
+				HitResult.GetActor()->FindComponentByClass<UHealthComponent>()->TakeDamage(attackDamage);
+			}
 		}
 		else 
 		{

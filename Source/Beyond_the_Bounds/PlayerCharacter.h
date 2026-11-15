@@ -62,6 +62,9 @@ private:
 	UPROPERTY(EditAnywhere, Category = "Attack")
 	float attackRange = 300.0f;
 
+	UPROPERTY(EditAnywhere, Category = "Attack")
+	float attackDamage = 20.0f;
+
 
 public:
 	UPROPERTY(ReplicatedUsing = OnRep_InteractionCount)

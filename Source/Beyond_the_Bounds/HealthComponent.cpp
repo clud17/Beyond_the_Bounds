@@ -1,4 +1,6 @@
 #include "HealthComponent.h"
+#include "EnemyBase.h"
+#include "PlayerCharacter.h"
 #include "Net/UnrealNetwork.h"
 
 
@@ -54,9 +56,27 @@ void UHealthComponent::TakeDamage(float dmg)
 	if (GetOwnerRole() == ROLE_Authority)
 	{
 		currentHealth -= dmg;
-		if (currentHealth < 0.0f)
+		if (currentHealth <= 0.0f)
 		{
 			currentHealth = 0.0f;
+
+			AActor* Owner = GetOwner();
+			
+			if (Owner) {
+				// Owner가 AEnemyBase 타입인지 확인하고, 맞다면 사망 처리
+				if (Owner->IsA(AEnemyBase::StaticClass()))
+				{
+					Owner->Destroy(); // 추후 destroy는 델리게이트를 통해 OnDeath 이벤트를 호출하도록 변경 예정
+				}
+				// Owner가 APlayerCharacter 타입인지 확인하고, 맞다면 사망 처리
+				if (Owner->IsA(APlayerCharacter::StaticClass())) 
+				{
+					// 델리게이트를 통해 OnDeath 이벤트를 호출하도록 변경 예정
+					// 사망 처리는 PlayerCharacter 클래스에서 구현
+					// 사망 UI 처리는 PlayerController에서 구현
+				}
+			}
+			
 		}
 		UE_LOG(LogTemp, Warning, TEXT("Damage taken: %f, Current Health: %f"), dmg, currentHealth);
 	}
