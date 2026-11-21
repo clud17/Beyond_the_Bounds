@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
+#include "ItemDefinition.h"
 #include "PlayerCharacter.generated.h"
 
 struct FInputActionValue;
@@ -55,6 +56,9 @@ protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Health")
 	TObjectPtr<class UHealthComponent> HealthComponent;
 
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Inventory")
+	TObjectPtr<class UInventoryComponent> InventoryComponent;
+
 private:
 	UPROPERTY(EditAnywhere, Category = "Movement")
 	float moveSpeed = 500.0f;
@@ -73,5 +77,8 @@ public:
 	UFUNCTION()
 	void OnRep_InteractionCount();
 
+	//테스트용 (아이템을 액터로 만들고 난 뒤라면 지워도됨)
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Inventory|Test")
+	TObjectPtr<UItemDefinition> TestItem;
 	
 };

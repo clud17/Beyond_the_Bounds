@@ -4,6 +4,7 @@
 #include "PlayerCharacter.h"
 #include "Net/UnrealNetwork.h"
 #include "HealthComponent.h"
+#include "InventoryComponent.h"
 #include "ClientPlayerController.h"
 #include "Kismet/KismetSystemLibrary.h"
 #include "EnhancedInputComponent.h"
@@ -16,6 +17,8 @@ APlayerCharacter::APlayerCharacter()
 
 	// health system Component
 	HealthComponent = CreateDefaultSubobject<UHealthComponent>(TEXT("HealthComponent"));
+	// inventory system Component
+	InventoryComponent = CreateDefaultSubobject<UInventoryComponent>(TEXT("InventoryComponent"));
 
 }
 
@@ -146,6 +149,8 @@ void APlayerCharacter::Server_Interact_Implementation()
 	if (HasAuthority())
 	{
 		//UE_LOG(LogTemp, Warning, TEXT("Server Interact action triggered"));
+		InventoryComponent->AddItem(TestItem, 1);
+		// 테스트용 (추후 지워도 됨)
 		InteractCount++;
 		UE_LOG(LogTemp, Warning, TEXT("Interaction count: %d"), InteractCount);
 	}
