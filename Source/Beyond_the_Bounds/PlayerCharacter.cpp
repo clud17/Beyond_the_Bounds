@@ -204,6 +204,14 @@ void APlayerCharacter::Server_Attack_Implementation()
 	}
 }
 
+void APlayerCharacter::Server_Craft_Implementation(FName RecipeName)
+{
+	if (HasAuthority() && InventoryComponent)
+	{
+		InventoryComponent->CraftItem(RecipeName);
+	}
+}
+
 void APlayerCharacter::OnRep_InteractionCount()
 {
 	UE_LOG(LogTemp, Warning, TEXT("OnRep: Interaction count updated: %d"), InteractCount);

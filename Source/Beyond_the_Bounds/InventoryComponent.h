@@ -5,6 +5,7 @@
 #include "CoreMinimal.h"
 #include "Components/ActorComponent.h"
 #include "ItemDefinition.h"
+#include "ItemRecipe.h"
 #include "InventoryComponent.generated.h"
 
 // 인벤토리에서 쓸 아이템 구조체 정의
@@ -48,9 +49,16 @@ public:
 	UFUNCTION()
 	void OnRep_InventoryItems();
 
+	// AddItem이랑 RemoveItem을 호출할 때 HasAutority()를 통해 서버 권위 검사 해야함!
+	// PlayerCharacter에서 검사 진행
+
 	// Character에서 interact 시 호출되는 아이템 추가 함수
 	// Quantity는 해당 액터에서 관리 
 	void AddItem(UItemDefinition* Item, int32 Quantity);
+
+	// 아이템 제거 함수
+	UFUNCTION(BlueprintCallable, Category = "Inventory")
+	void RemoveItem(UItemDefinition* Item, int32 Quantity);
 
 	// InventoryComponent에서 사용할 아이템 찾기 함수
 	FInventoryItem* FindItem(const UItemDefinition* Item);
@@ -58,4 +66,11 @@ public:
 	// 인벤토리 내부를 ID 순서대로 정렬
 	void SortInventoryByID();
 
+	// 아이템 조합 함수 // 조합법 이름를 받아와서 이에 맞는 조합 실행
+	void CraftItem(FName RecipeName);
+	// 조합 가능 확인(갯수 확인) 함수
+	bool AvailableCraft(const FName RecipeName);
+	// 조합법 DataTable
+	UPROPERTY(EditAnywhere, Category = "Crafting")
+	TObjectPtr<UDataTable> CraftingTable;
 };

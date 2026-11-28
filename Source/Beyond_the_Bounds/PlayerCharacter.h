@@ -52,6 +52,9 @@ protected:
 	// Server RPC - attack functions
 	UFUNCTION(Server, Reliable)
 	void Server_Attack();
+	// Server RPC - craft functions
+	UFUNCTION(Server, Reliable)
+	void Server_Craft(FName RecipeName);
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Health")
 	TObjectPtr<class UHealthComponent> HealthComponent;

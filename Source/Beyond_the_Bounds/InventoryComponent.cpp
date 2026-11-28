@@ -54,6 +54,7 @@ void UInventoryComponent::AddItem(UItemDefinition* Item, int32 Quantity)
 		{
 			UE_LOG(LogTemp, Warning, TEXT("Cannot add item: Exceeds max stack limit"));
 			// **** 나중에 차이만큼 바닥에 떨구는거 구현해야함 ****
+			// 아래는 return이 아니라 바닥에 떨궈야함.
 			return;
 		}
 
@@ -65,6 +66,35 @@ void UInventoryComponent::AddItem(UItemDefinition* Item, int32 Quantity)
 	InventoryItems.Add(FInventoryItem{ Item, Quantity });
 
 	SortInventoryByID();
+}
+
+// 아이템 제거 함수
+void UInventoryComponent::RemoveItem(UItemDefinition* Item, int32 Quantity) 
+{
+	if (!Item || Quantity <= 0)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Invalid item or quantity"));
+		return;
+	}
+	
+	FInventoryItem* ExistingItem = FindItem(Item);
+	if (ExistingItem)
+	{
+		if (ExistingItem->quantity >= Quantity) // 현재 가지고 있는 아이템 수량이 요구하는 아이템보다 많을 때
+		{
+			ExistingItem->quantity -= Quantity;
+
+			// 아이템 수량이 0 이하면 인벤토리에서 삭제
+			InventoryItems.RemoveAll([](const FInventoryItem& Invenitem)
+				{
+					return Invenitem.quantity <= 0;
+				});
+		}
+		else
+		{
+			UE_LOG(LogTemp, Warning, TEXT("You dont have amount of quantity"));
+		}
+	}
 }
 
 // InventoryComponent에서 사용할 아이템 찾기 함수 (ID 기반 Find)
@@ -90,4 +120,72 @@ void UInventoryComponent::SortInventoryByID()
 	InventoryItems.Sort([](const FInventoryItem& A, const FInventoryItem& B)
 		{	return A.items->ID < B.items->ID;}
 	);
+}
+
+// 아이템 조합 함수
+void UInventoryComponent::CraftItem(FName RecipeName)
+{
+	// 서버 권위 검사
+	if (!GetOwner() || !GetOwner()->HasAuthority())
+	{
+		return;
+	}
+
+	if (!CraftingTable) return;
+
+	// FindRow를 통해 조합법을 찾아서, 이 조합법에 맞는 크래프팅 실행 
+	FItemRecipe* ItemRecipe;
+	ItemRecipe = CraftingTable->FindRow<FItemRecipe>(RecipeName, TEXT("CraftItem"));
+
+	// 조합이 가능한지 확인하는 변수
+	bool canCraft;
+	canCraft = AvailableCraft(RecipeName);
+
+	// 수량이 부족하지 않고 조합이 가능할 때, 재료 삭제 후 아이템 추가
+	if (ItemRecipe && canCraft) 
+	{
+		// 조합법에 있는 재료들을 순회하면서 조합 실행
+		for (int i = 0; i < ItemRecipe->ingredients.Num(); i++) 
+		{
+			RemoveItem(ItemRecipe->ingredients[i].items, ItemRecipe->ingredients[i].quantity);
+		}
+		
+		AddItem(ItemRecipe->item, ItemRecipe->ResultQuantity);
+	}
+}
+
+bool UInventoryComponent::AvailableCraft(FName RecipeName)
+{
+	if (!CraftingTable) return false;
+
+	FItemRecipe* ItemRecipe;
+	ItemRecipe = CraftingTable->FindRow<FItemRecipe>(RecipeName, TEXT("CraftItem"));
+
+	// 조합법을 찾을 수 없으면 fasle
+	if (!ItemRecipe) return false;
+	
+	// 현재 조합이 가능한지 확인하는 리턴 값
+	bool availableCraft = false;
+
+	// 재료의 아이템과 현재 인벤토리 아이템의 수량을 비교해서 
+	for (int i = 0; i < ItemRecipe->ingredients.Num(); i++) 
+	{
+		const FInventoryItem* ExistingItem = FindItem(ItemRecipe->ingredients[i].items);
+
+		// 조합법에 없는 아이템을 찾으면 false
+		if (!ExistingItem) return false;
+
+		if (ExistingItem->quantity >= ItemRecipe->ingredients[i].quantity)
+		{
+			availableCraft = true;
+		}
+		else
+		{
+			UE_LOG(LogTemp, Warning, TEXT("You dont have amount of quantity, so you cant craft"));
+			availableCraft = false;
+			break;
+		}
+	}
+
+	return availableCraft;
 }
